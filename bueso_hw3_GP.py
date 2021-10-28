@@ -72,16 +72,16 @@ if plot1:
 
 ## GAUSSIAN PROCESS
 my_kernel = C(1.0) * RBF(1030) + WhiteKernel()
-GP = GaussianProcessRegressor(kernel = my_kernel)
+GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 4)
 
 X = np.atleast_2d(range(len(time))).T
 
 GP.fit(X,column(d2_sensors[5],col))
-
+print(GP)
 x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
 
 y_pred, sigma = GP.predict(x, return_std=True)
 plt.figure()
 plt.plot(X, column(d2_sensors[5],col), "r-", markersize=2, label="Observations")
-plt.plot(x, y_pred, "b-", label="Prediction")
+plt.plot(X, y_pred, "b-", label="Prediction")
 plt.show()
