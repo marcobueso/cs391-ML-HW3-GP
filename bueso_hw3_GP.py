@@ -2,6 +2,7 @@
 import csv
 from matplotlib import pyplot as plt
 import numpy as np
+import pandas as pd
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C, WhiteKernel
@@ -53,7 +54,7 @@ load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning
 
 
 ### PLOT first num_side^2 sensors' data - the 'y' component
-# num_side = 3
+# num_side = 2
 # fig, axs = plt.subplots(num_side, num_side)
 # for i in range(num_side):
 #     for j in range(num_side):
@@ -63,25 +64,80 @@ load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning
 # plt.show()
 
 
-### PLOT sensor 5's 'y' component data, for 4 trials
+### PLOT sensor s_no's 'y' component data, for 4 trials, dictionary 2-5
 col = 1
+s_no = 6
 if plot1:
-    plt.plot(time,column(d2_sensors[5],col),time,column(d3_sensors[5],col),time,column(d4_sensors[5],col),time,column(d5_sensors[5],col))
+    plt.plot(time,column(d2_sensors[s_no],col),time,column(d3_sensors[s_no],col),time,column(d4_sensors[s_no],col),time,column(d5_sensors[s_no],col))
     plt.show()
 
 
 ## GAUSSIAN PROCESS
 my_kernel = C(1.0) * RBF(1030) + WhiteKernel()
-GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 4)
+GP = GaussianProcessRegressor(kernel = my_kernel)#TODO: changed: , n_restarts_optimizer = 4)
 
 X = np.atleast_2d(range(len(time))).T
-
-GP.fit(X,column(d2_sensors[5],col))
-print(GP)
+col_d2 = column(d2_sensors[s_no],col)
+print(len(col_d2))
+col_d3 = column(d3_sensors[s_no],col)
+d = {'d2': col_d2, 'd3': col_d3}
+df = pd.DataFrame(data=d)
+GP.fit(X, df)
+GP.get_params()
 x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
 
 y_pred, sigma = GP.predict(x, return_std=True)
-plt.figure()
-plt.plot(X, column(d2_sensors[5],col), "r-", markersize=2, label="Observations")
-plt.plot(X, y_pred, "b-", label="Prediction")
+# plt.figure()
+# plt.plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
+# plt.plot(X, y_pred, "b-", label="Prediction")
+# plt.show()
+data = np.atleast_2d(range(len(time)))
+print(data)
+#for i in range(len(time)):
+    
+
+
+
+fig, axs = plt.subplots(2, 2)
+axs[0, 0].plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
+axs[0, 0].set_title('Axis [0, 0]: Observations')
+axs[0, 1].plot(X, y_pred, "b-", label="Prediction")
+axs[0, 1].plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
+axs[0, 1].plot(X, col_d3, "g-", markersize=2)
+axs[0,1].fill(
+    np.concatenate([x, x[::-1]]),
+    #np.concatenate([y_pred - 1.9600*sigma, (y_pred + 1.9600*sigma)[::-1]]),
+    np.concatenate([column(y_pred,1) - 1.9600*sigma, (column(y_pred,1) + 1.9600*sigma)[::-1]]),
+    alpha=0.5,
+    fc="b",
+    ec="None",
+    label="95% confidence interval",
+)
+axs[0,1].legend(loc="upper left")
+axs[0, 1].set_title('Axis [0, 1]: Prediction')
+
+# FIT WITH DICT 3
+GP.fit(X,column(d3_sensors[s_no],col))
+x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
+
+y_pred, sigma = GP.predict(x, return_std=True)
+
+axs[1, 0].plot(X, y_pred, "g-", label="Prediction")
+axs[1, 0].plot(X, column(d3_sensors[s_no],col), "r-", markersize=2, label="Observations")
+axs[1, 0].fill(
+    np.concatenate([x, x[::-1]]),
+    np.concatenate([y_pred - 1.9600*sigma, (y_pred + 1.9600*sigma)[::-1]]),
+    alpha=0.5,
+    fc="g",
+    ec="None",
+    label="95% confidence interval",
+)
+axs[1, 0].legend(loc="upper left")
+axs[1, 0].set_title('Axis [1 0]: Prediction after Dict 3')
+
+#axs[1, 0].plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
+#axs[1, 0].plot(X, y_pred, "b-", label="Prediction")
+#axs[1, 0].set_title('Both')
+# axs[1, 1].plot(x, column(d2_sensors[s_no],col), 'tab:red')
+# axs[1, 1].set_title('Ignore')
 plt.show()
