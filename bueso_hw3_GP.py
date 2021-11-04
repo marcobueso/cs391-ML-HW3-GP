@@ -66,78 +66,116 @@ load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning
 
 ### PLOT sensor s_no's 'y' component data, for 4 trials, dictionary 2-5
 col = 1
-s_no = 6
+s_no = 5
 if plot1:
     plt.plot(time,column(d2_sensors[s_no],col),time,column(d3_sensors[s_no],col),time,column(d4_sensors[s_no],col),time,column(d5_sensors[s_no],col))
     plt.show()
 
+col_d2 = column(d2_sensors[s_no],col)
+col_d3 = column(d3_sensors[s_no],col)
+col_d4 = column(d4_sensors[s_no],col)
+col_d5 = column(d4_sensors[s_no],col)
+
 
 ## GAUSSIAN PROCESS
-my_kernel = C(1.0) * RBF(1030) + WhiteKernel()
-GP = GaussianProcessRegressor(kernel = my_kernel)#TODO: changed: , n_restarts_optimizer = 4)
+my_kernel = C(1.0, (1e-6, 1e6)) * RBF(1030) + WhiteKernel()
 
+# Create figure
+fig, axs = plt.subplots(2, 1)
+
+# FIT - Separate
+data = np.empty([1030, 2])
+for i in range(len(time)):
+    data[i][0] = col_d2[i]
+    data[i][1] = col_d3[i]
+GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 4)
 X = np.atleast_2d(range(len(time))).T
-col_d2 = column(d2_sensors[s_no],col)
-print(len(col_d2))
-col_d3 = column(d3_sensors[s_no],col)
-d = {'d2': col_d2, 'd3': col_d3}
-df = pd.DataFrame(data=d)
-GP.fit(X, df)
-GP.get_params()
+GP.fit(X, data)
 x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
 
 y_pred, sigma = GP.predict(x, return_std=True)
-# plt.figure()
-# plt.plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
-# plt.plot(X, y_pred, "b-", label="Prediction")
-# plt.show()
-data = np.atleast_2d(range(len(time)))
-print(data)
-#for i in range(len(time)):
-    
 
-
-
-fig, axs = plt.subplots(2, 2)
-axs[0, 0].plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
-axs[0, 0].set_title('Axis [0, 0]: Observations')
-axs[0, 1].plot(X, y_pred, "b-", label="Prediction")
-axs[0, 1].plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
-axs[0, 1].plot(X, col_d3, "g-", markersize=2)
-axs[0,1].fill(
+# Plot
+axs[0].plot(X, col_d2, "r-", markersize=2, label="Observations - d2")
+axs[0].plot(X, col_d3, "g-", markersize=2, label="Observations - d3")
+axs[0].plot(X, column(y_pred,0), "b-", label="Prediction - 2")
+axs[0].plot(X, column(y_pred,1), "b-", label="Prediction - 3")
+axs[0].fill(
     np.concatenate([x, x[::-1]]),
-    #np.concatenate([y_pred - 1.9600*sigma, (y_pred + 1.9600*sigma)[::-1]]),
-    np.concatenate([column(y_pred,1) - 1.9600*sigma, (column(y_pred,1) + 1.9600*sigma)[::-1]]),
+    np.concatenate([column(y_pred,0) - 1.9600*sigma, (column(y_pred,0) + 1.9600*sigma)[::-1]]),
     alpha=0.5,
     fc="b",
     ec="None",
     label="95% confidence interval",
 )
-axs[0,1].legend(loc="upper left")
-axs[0, 1].set_title('Axis [0, 1]: Prediction')
-
-# FIT WITH DICT 3
-GP.fit(X,column(d3_sensors[s_no],col))
-x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
-
-y_pred, sigma = GP.predict(x, return_std=True)
-
-axs[1, 0].plot(X, y_pred, "g-", label="Prediction")
-axs[1, 0].plot(X, column(d3_sensors[s_no],col), "r-", markersize=2, label="Observations")
-axs[1, 0].fill(
+axs[0].fill(
     np.concatenate([x, x[::-1]]),
-    np.concatenate([y_pred - 1.9600*sigma, (y_pred + 1.9600*sigma)[::-1]]),
+    np.concatenate([column(y_pred,1) - 1.9600*sigma, (column(y_pred,1) + 1.9600*sigma)[::-1]]),
     alpha=0.5,
     fc="g",
     ec="None",
     label="95% confidence interval",
 )
-axs[1, 0].legend(loc="upper left")
-axs[1, 0].set_title('Axis [1 0]: Prediction after Dict 3')
+axs[0].legend(loc="upper left")
 
-#axs[1, 0].plot(X, column(d2_sensors[s_no],col), "r-", markersize=2, label="Observations")
-#axs[1, 0].plot(X, y_pred, "b-", label="Prediction")
-#axs[1, 0].set_title('Both')
-# axs[1, 1].plot(x, column(d2_sensors[s_no],col), 'tab:red')
-# axs[1, 1].set_title('Ignore')
+
+# FIT 2 - Grouped
+axs[1].plot(X, col_d2, "r-", markersize=2, label="Observations - d2")
+axs[1].plot(X, col_d3, "g-", markersize=2, label="Observations - d3")
+axs[1].plot(X, col_d4, "g-", markersize=2, label="Observations - d4")
+axs[1].plot(X, col_d5, "g-", markersize=2, label="Observations - d5")
+#data = np.empty([1030, 2])
+data = []
+time_doubled = np.empty([2060, 1])
+time_four = np.empty([2060*2, 1])
+for i in range(len(time)):
+    data.append(col_d2[i])
+for i in range(len(time)):
+    data.append(col_d3[i])
+    #data[i][0] = col_d2[i]
+    #data[i][1] = col_d3[i]
+for i in range(len(time)):
+    data.append(col_d4[i])
+for i in range(len(time)):
+    data.append(col_d5[i])
+GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 4)
+#X = np.atleast_2d(range(len(time))).T
+X = np.atleast_2d(list(range(len(time)))+list(range(len(time)))+list(range(len(time)))+list(range(len(time)))).T
+GP.fit(X, data)
+print(GP.kernel_.get_params()['k1__k1'])
+x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
+
+y_pred, sigma = GP.predict(x, return_std=True)
+axs[1].plot(X[:1030], y_pred, "b-", label="Prediction")
+axs[1].fill(
+    np.concatenate([x, x[::-1]]),
+    np.concatenate([y_pred - 1.9600*sigma, (y_pred + 1.9600*sigma)[::-1]]),
+    alpha=0.5,
+    fc="b",
+    ec="None",
+    label="95% confidence interval",
+)
+axs[1].legend(loc="upper left")
+
+
+
 plt.show()
+
+# Second Plot - Prediction vs d5
+plt.figure(2)
+
+plt.plot(X[:1030], col_d5, "g-", markersize=2, label="Observations - d5")
+plt.plot(X[:1030], y_pred, "b-", label="Prediction")
+plt.fill(
+    np.concatenate([x, x[::-1]]),
+    np.concatenate([y_pred - 1.9600*sigma, (y_pred + 1.9600*sigma)[::-1]]),
+    alpha=0.5,
+    fc="b",
+    ec="None",
+    label="95% confidence interval",
+)
+plt.legend(loc="upper left")
+plt.show()
+
+
+# Calculate Global Kernel Loss
