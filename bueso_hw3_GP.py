@@ -138,11 +138,10 @@ for i in range(len(time)):
     data.append(col_d4[i])
 for i in range(len(time)):
     data.append(col_d5[i])
-GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 4)
+GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 3)
 #X = np.atleast_2d(range(len(time))).T
 X = np.atleast_2d(list(range(len(time)))+list(range(len(time)))+list(range(len(time)))+list(range(len(time)))).T
 GP.fit(X, data)
-print(GP.kernel_.get_params()['k1__k1'])
 x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
 
 y_pred, sigma = GP.predict(x, return_std=True)
@@ -179,3 +178,15 @@ plt.show()
 
 
 # Calculate Global Kernel Loss
+# find (d5 - y_pred)^2 / 1030 
+sum_squares = 0
+for i in range(len(col_d5)):
+    sum_squares += (col_d5[i] - y_pred[i])**2
+
+loss_global = sum_squares
+print(f"Global kernel loss: {loss_global}")
+print(f"Global kernel parameter: {GP.kernel_.get_params()['k1__k1']}")
+
+
+
+## SLIDING WINDOW GAUSSIAN PROCESS
