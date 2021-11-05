@@ -1,4 +1,8 @@
-
+### HOMEWORK 4: Gaussian Process for Motion Prediction ###
+# Author: Marco Bueso
+# Date: 11/04/2021
+# Course: CS 391 Machine Learning
+# Prof. Dana Ballard
 import csv
 from matplotlib import pyplot as plt
 import numpy as np
@@ -34,6 +38,7 @@ def load_data(path, d_sensors, num_sensors = 50, loadTime = False):
                     d_sensors[int( (i-11) / 4)].append( d_sensors[int( (i-11) / 4) - 1]  )
 
 # code from StackOverflow user: Martin Geisler, https://stackoverflow.com/questions/903853/how-do-you-extract-a-column-from-a-multi-dimensional-array
+# Convert to a 1D column from a matrix of data
 def column(matrix, i):
     return [row[i] for row in matrix]
 
@@ -45,6 +50,7 @@ d3_sensors = {}
 d4_sensors = {}
 d5_sensors = {}
 
+#TODO: Change to data path
 load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block1-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213203046-59968-right-speed_0.500.csv", d1_sensors, num_sensors = 10, loadTime = True)
 load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block2-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204004-59968-right-speed_0.500.csv", d2_sensors, num_sensors = 10)
 load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block3-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204208-59968-right-speed_0.500.csv", d3_sensors, num_sensors = 10)
@@ -80,46 +86,7 @@ col_d5 = column(d4_sensors[s_no],col)
 ## GAUSSIAN PROCESS
 my_kernel = C(1.0, (1e-6, 1e6)) * RBF(1030) + WhiteKernel()
 
-# Create figure
-# fig, axs = plt.subplots(2, 1)
-
-# FIT - Separate
-# data = np.empty([1030, 2])
-# for i in range(len(time)):
-#     data[i][0] = col_d2[i]
-#     data[i][1] = col_d3[i]
-# GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 4)
-# X = np.atleast_2d(range(len(time))).T
-# GP.fit(X, data)
-# x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
-
-# y_pred, sigma = GP.predict(x, return_std=True)
-
-# # Plot
-# axs[0].plot(X, col_d2, "r-", markersize=2, label="Observations - d2")
-# axs[0].plot(X, col_d3, "g-", markersize=2, label="Observations - d3")
-# axs[0].plot(X, column(y_pred,0), "b-", label="Prediction - 2")
-# axs[0].plot(X, column(y_pred,1), "b-", label="Prediction - 3")
-# axs[0].fill(
-#     np.concatenate([x, x[::-1]]),
-#     np.concatenate([column(y_pred,0) - 1.9600*sigma, (column(y_pred,0) + 1.9600*sigma)[::-1]]),
-#     alpha=0.5,
-#     fc="b",
-#     ec="None",
-#     label="95% confidence interval",
-# )
-# axs[0].fill(
-#     np.concatenate([x, x[::-1]]),
-#     np.concatenate([column(y_pred,1) - 1.9600*sigma, (column(y_pred,1) + 1.9600*sigma)[::-1]]),
-#     alpha=0.5,
-#     fc="g",
-#     ec="None",
-#     label="95% confidence interval",
-# )
-# axs[0].legend(loc="upper left")
-
-
-# FIT 2 - Grouped
+# FIT 1 - 3 datasets Grouped - 2,3,4
 data = []
 for i in range(len(time)):
     data.append(col_d2[i])
@@ -128,7 +95,6 @@ for i in range(len(time)):
 for i in range(len(time)):
     data.append(col_d4[i])
 GP = GaussianProcessRegressor(kernel = my_kernel, n_restarts_optimizer = 3)
-#X = np.atleast_2d(range(len(time))).T
 X = np.atleast_2d(list(range(len(time)))+list(range(len(time)))+list(range(len(time)))).T # for three datasets
 GP.fit(X, data)
 x = np.atleast_2d(np.linspace(1, 1030, 1030)).T
@@ -189,7 +155,7 @@ sum_squares_local = 0
 X_plot = np.atleast_2d(list(range(len(time)))).T # for three datasets
 local_kernels_params = []
 plt.figure(3)
-while curr + window < 1030: #for i in range(curr, curr + window):
+while curr + window < 1030:
     data = []
     for i in range(window):
         data.append(col_d2[curr + i])
@@ -207,7 +173,6 @@ while curr + window < 1030: #for i in range(curr, curr + window):
     for i in range(window - delta):
         if (prev_prediction[i] != 0):
             y_pred[i] = (y_pred[i] + prev_prediction[i + delta]) / 2
-    #print(f"prediction at y size: {len(y_pred)}")
     prediction.append(y_pred[:10])
     sigmas.append(sigma[:10])
     print(f"prediction size: {len(prediction)}")
@@ -228,6 +193,8 @@ while curr + window < 1030: #for i in range(curr, curr + window):
     # increase sliding window position
     curr += delta
 prediction = np.concatenate(prediction)
+
+#Plot
 plt.plot(X_plot, col_d2, "p-", markersize=2, label="Observations - d2")
 plt.plot(X_plot, col_d3, "b-", markersize=2, label="Observations - d3")
 plt.plot(X_plot, col_d4, "y-", markersize=2, label="Observations - d4")
@@ -237,8 +204,11 @@ plt.legend(loc="upper left")
 plt.title("GP: Prediction vs. Observations")
 plt.show()
 
+# Calculate Local Kernel Loss
 print(f"Local kernel loss: {sum_squares_local}")
 print(f"Local kernel parameter: {eval(str(local_kernels_params))}")
+
+# Plot Local Kernel Parameters
 plt.figure(4)
 plt.plot(eval(str(local_kernels_params)))
 plt.title("Kernel parameters")
