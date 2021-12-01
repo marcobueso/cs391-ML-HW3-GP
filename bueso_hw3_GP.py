@@ -51,11 +51,11 @@ d4_sensors = {}
 d5_sensors = {}
 
 #TODO: Change to data path
-load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block1-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213203046-59968-right-speed_0.500.csv", d1_sensors, num_sensors = 10, loadTime = True)
-load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block2-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204004-59968-right-speed_0.500.csv", d2_sensors, num_sensors = 10)
-load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block3-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204208-59968-right-speed_0.500.csv", d3_sensors, num_sensors = 10)
-load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block4-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204925-59968-right-speed_0.500.csv", d4_sensors, num_sensors = 10)
-load_data(r"C:\Users\boysb\OneDrive\Documentos\UTexas\Fall 2021\Machine Learning\cs391-ML-HW3-GP\data_GP\AG\block5-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213210121-59968-right-speed_0.500.csv", d5_sensors, num_sensors = 10)
+load_data(r"\cs391-ML-HW3-GP\data_GP\AG\block1-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213203046-59968-right-speed_0.500.csv", d1_sensors, num_sensors = 10, loadTime = True)
+load_data(r"\cs391-ML-HW3-GP\data_GP\AG\block2-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204004-59968-right-speed_0.500.csv", d2_sensors, num_sensors = 10)
+load_data(r"\cs391-ML-HW3-GP\data_GP\AG\block3-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204208-59968-right-speed_0.500.csv", d3_sensors, num_sensors = 10)
+load_data(r"\cs391-ML-HW3-GP\data_GP\AG\block4-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213204925-59968-right-speed_0.500.csv", d4_sensors, num_sensors = 10)
+load_data(r"\cs391-ML-HW3-GP\data_GP\AG\block5-UNWEIGHTED-SLOW-NONDOMINANT-RANDOM\20161213210121-59968-right-speed_0.500.csv", d5_sensors, num_sensors = 10)
 
 
 
